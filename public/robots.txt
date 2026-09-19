@@ -12,4 +12,4 @@ Disallow: /forgot-password
 Disallow: /verification
 Disallow: /webhooks/
 
-Sitemap: https://earthmamouldtech.com/sitemap.xml
+Sitemap: https://wairirimart.com/sitemap.xml
