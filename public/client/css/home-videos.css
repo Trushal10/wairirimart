@@ -1,0 +1,183 @@
+/* ============================================================
+   "What Our Makers Say" video reel (client/partials/home-videos).
+   Inlined by that partial, so only the home page pays for it,
+   and only when at least one video is active.
+
+   Cards are absolutely centred in .hv-stage; home-videos.js moves
+   each one sideways and scales it by its distance from the active
+   card, using --hv-gap and --hv-side-scale from the stage.
+   ============================================================ */
+
+.hv-section { position: relative; overflow: hidden; }
+
+.hv-stage {
+    --hv-w: clamp(240px, 30vw, 420px);
+    --hv-gap: 28px;
+    --hv-side-scale: .74;
+    position: relative;
+    height: calc(var(--hv-w) * 25 / 18);
+    margin-top: 44px;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    outline: none;
+}
+.hv-stage:focus-visible { outline: 2px solid var(--primary); outline-offset: 8px; border-radius: 24px; }
+
+/* Decorative ribbon behind the right-hand cards, in the brand colour. */
+.hv-ribbon {
+    position: absolute;
+    top: -12%;
+    right: 2%;
+    width: 36%;
+    height: 124%;
+    color: var(--primary);
+    opacity: .16;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ---------- card ---------- */
+.hv-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--hv-w);
+    aspect-ratio: 18 / 25;
+    transform: translate(-50%, -50%);
+    transition: transform .7s cubic-bezier(.22, .8, .2, 1), opacity .45s ease;
+    will-change: transform;
+    cursor: pointer;
+}
+.hv-card.hv-no-anim { transition: none; }
+.hv-card.is-far,
+.hv-card.is-leaving { opacity: 0; pointer-events: none; }
+
+.hv-media {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: calc(var(--hv-w) * .13);
+    overflow: hidden;
+    background: var(--main);
+    box-shadow: 0 30px 60px -34px rgba(42, 40, 43, .5);
+    transform: translateZ(0); /* keeps the radius clipping the video in Safari */
+}
+
+.hv-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ---------- caption (top-left) ---------- */
+.hv-caption {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 9% 9% 18%;
+    color: #fff;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, .42), rgba(0, 0, 0, 0));
+    pointer-events: none;
+    z-index: 1;
+}
+.hv-title {
+    margin: 0;
+    font-size: clamp(16px, 1.55vw, 22px);
+    font-weight: 700;
+    line-height: 1.25;
+    color: #fff;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, .3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.hv-subtitle {
+    margin: 4px 0 0;
+    font-size: clamp(13px, 1.1vw, 16px);
+    line-height: 1.35;
+    color: rgba(255, 255, 255, .9);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, .3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------- round buttons (bottom-right) ---------- */
+/* The theme gives every <button> padding and a dark fill; reset both, or the
+   icon is squeezed out of a small circle. */
+.hv-section .hv-fab {
+    padding: 0;
+    line-height: 1;
+    min-width: 0;
+    position: absolute;
+    right: 7%;
+    bottom: 6%;
+    width: clamp(42px, 4vw, 58px);
+    height: clamp(42px, 4vw, 58px);
+    border: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: rgba(70, 64, 70, .5);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: opacity .3s, transform .3s, background-color .2s;
+    z-index: 2;
+}
+.hv-section .hv-fab:hover { background: rgba(70, 64, 70, .72); color: #fff; }
+.hv-section .hv-fab:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.hv-play svg { margin-left: 2px; }
+
+/* Play shows unless this card is the one playing; sound shows only then. */
+.hv-card.is-active.is-playing .hv-play,
+.hv-card:not(.is-active.is-playing) .hv-sound { opacity: 0; transform: scale(.8); pointer-events: none; }
+
+.hv-ico-sound { display: none; }
+.hv-section.is-unmuted .hv-ico-sound { display: block; }
+.hv-section.is-unmuted .hv-ico-muted { display: none; }
+
+/* ---------- shop link (bottom-left, active card only) ---------- */
+.hv-cta {
+    position: absolute;
+    left: 7%;
+    bottom: 6%;
+    height: clamp(42px, 4vw, 58px);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 clamp(14px, 1.4vw, 22px);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--main);
+    background: #fff;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity .35s, transform .35s, background-color .2s, color .2s;
+    z-index: 2;
+}
+.hv-card.is-active .hv-cta { opacity: 1; transform: none; pointer-events: auto; }
+.hv-cta:hover { background: var(--primary); color: #fff; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 991px) {
+    .hv-stage { --hv-w: clamp(220px, 40vw, 340px); --hv-gap: 20px; --hv-side-scale: .78; }
+    .hv-ribbon { width: 48%; }
+}
+@media (max-width: 575px) {
+    .hv-stage { --hv-w: 64vw; --hv-gap: 12px; --hv-side-scale: .8; margin-top: 28px; }
+    .hv-ribbon { width: 70%; right: -18%; }
+    .hv-cta { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hv-card, .hv-fab, .hv-cta { transition: none !important; }
+}

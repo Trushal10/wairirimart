@@ -1,0 +1,213 @@
+/* ============================================================
+   "Your Orders" on the customer account page
+   (client/partials/account-order-card). Inlined by the profile
+   page after order-ui.css, whose --ou-* tokens, .ou-chip, .ou-btn,
+   .ou-item and .ou-total it builds on.
+   ============================================================ */
+
+.ao-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+.ao-header h5 { margin: 0; color: var(--ou-ink); }
+.ao-header span { font-size: 13px; color: var(--ou-soft); }
+
+.ao-list { display: grid; gap: 18px; }
+
+/* ---------- card ---------- */
+.ao-card {
+    background: var(--ou-surface);
+    border: 1px solid var(--ou-line);
+    border-radius: var(--ou-radius);
+    overflow: hidden;
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
+.ao-card:hover { border-color: #dcdcdc; box-shadow: 0 10px 30px -18px rgba(20, 22, 26, .25); }
+
+.ao-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px 0;
+}
+.ao-no { font-size: 15px; color: var(--ou-body); }
+.ao-no strong { color: var(--ou-ink); font-weight: 700; }
+.ao-date { font-size: 12.5px; color: var(--ou-soft); margin-top: 3px; }
+
+/* ---------- progress rail ---------- */
+.ao-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    list-style: none;
+    margin: 18px 22px 0;
+    padding: 0;
+}
+.ao-step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    text-align: center;
+}
+/* Connector to the previous step, drawn from each step but the first. */
+.ao-step + .ao-step::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--ou-line);
+}
+.ao-step.is-done + .ao-step.is-done::before,
+.ao-step.is-done + .ao-step.is-current::before { background: var(--main, #2A282B); }
+.ao-step-dot {
+    position: relative;
+    z-index: 1;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 2px solid var(--ou-line);
+    color: #fff;
+}
+.ao-step.is-done .ao-step-dot { background: var(--main, #2A282B); border-color: var(--main, #2A282B); }
+.ao-step.is-current .ao-step-dot {
+    border-color: var(--primary, #B0785F);
+    box-shadow: 0 0 0 4px rgba(176, 120, 95, .18);
+}
+.ao-step-label { font-size: 12px; color: var(--ou-soft); font-weight: 500; }
+.ao-step.is-done .ao-step-label { color: var(--ou-ink); }
+.ao-step.is-current .ao-step-label { color: var(--primary, #B0785F); font-weight: 600; }
+
+/* ---------- body ---------- */
+.ao-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 18px 22px 0;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--ou-ground);
+}
+.ao-thumbs { display: flex; gap: 6px; flex-shrink: 0; }
+.ao-thumb {
+    position: relative;
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+}
+.ao-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
+.ao-thumb--more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ou-body);
+    background: #ececec;
+}
+.ao-qty {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--ou-ink);
+}
+
+.ao-summary { flex: 1 1 auto; min-width: 0; }
+.ao-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ou-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ao-title span { font-weight: 500; color: var(--ou-soft); }
+.ao-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--ou-body);
+}
+.ao-pay[data-status="paid"] { color: var(--ou-ok-fg); font-weight: 600; }
+.ao-pay[data-status="pending"] { color: var(--ou-warn-fg); }
+.ao-pay[data-status="failed"] { color: var(--ou-bad-fg); }
+.ao-pay[data-status="refunded"],
+.ao-pay[data-status="partially_refunded"] { color: #6a3fbd; font-weight: 600; }
+
+.ao-total { flex-shrink: 0; text-align: right; }
+.ao-total span { display: block; font-size: 11.5px; color: var(--ou-soft); text-transform: uppercase; letter-spacing: .06em; }
+.ao-total strong { font-size: 18px; color: var(--ou-ink); white-space: nowrap; }
+
+/* ---------- notes ---------- */
+.ao-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 14px 22px 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.45;
+}
+.ao-note svg { flex-shrink: 0; margin-top: 1px; }
+.ao-note--warn { background: var(--ou-warn-bg); color: var(--ou-warn-fg); }
+.ao-note--bad { background: var(--ou-bad-bg); color: var(--ou-bad-fg); }
+
+.ao-card.is-cancelled .ao-body { opacity: .7; }
+
+/* ---------- actions ---------- */
+.ao-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 22px 18px;
+}
+.ao-actions .ou-btn { padding: 9px 16px; font-size: 13.5px; }
+.ao-cancel { margin-left: auto; }
+.ao-chevron { transition: transform .2s ease; }
+.ao-toggle:not(.collapsed) .ao-chevron { transform: rotate(180deg); }
+
+/* ---------- expanded detail ---------- */
+.ao-detail { border-top: 1px solid var(--ou-line-soft); }
+.ao-items { padding: 4px 22px; }
+.ao-totals { padding: 14px 22px 18px; background: var(--ou-ground); }
+
+.orders-pagination { margin-top: 22px; display: flex; justify-content: center; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 575px) {
+    .ao-head { padding: 16px 16px 0; }
+    .ao-steps { margin: 16px 12px 0; }
+    .ao-step-label { font-size: 11px; }
+    .ao-body { flex-wrap: wrap; margin: 16px 16px 0; }
+    .ao-summary { flex-basis: calc(100% - 140px); }
+    .ao-total { flex-basis: 100%; display: flex; align-items: baseline; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--ou-line); text-align: left; }
+    .ao-note { margin: 12px 16px 0; }
+    .ao-actions { padding: 14px 16px 16px; }
+    .ao-actions .ou-btn { flex: 1 1 calc(50% - 5px); }
+    .ao-cancel { margin-left: 0; flex-basis: 100% !important; }
+    .ao-items { padding: 4px 16px; }
+    .ao-totals { padding: 12px 16px 16px; }
+}

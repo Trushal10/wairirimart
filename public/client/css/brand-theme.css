@@ -1,0 +1,63 @@
+/* ============================================================
+   Earthma Mould Tech brand palette.
+   Loaded AFTER styles.css so these token values win over the
+   theme defaults (same :root specificity, later in cascade).
+   Colors sampled from the logo: rose-gold lettering + the
+   neutral charcoal facets of the cube mark.
+
+   Tokens only — no layout, spacing, or component rules, so the
+   theme's behavior is untouched; everything that referenced the
+   default red/near-black simply picks up the brand colors.
+   Status colors (--critical, --success, --warning) keep their
+   functional meaning and are left as the theme defines them.
+   ============================================================ */
+:root {
+    --primary: #B0785F;                      /* rose gold — accents, prices, active states */
+    --main: #2A282B;                         /* neutral charcoal — buttons, headings */
+    --secondary: #6E6663;                    /* muted warm grey — secondary text */
+    --secondary-2: #9C9391;                  /* lighter muted grey — captions, counts */
+    --surface: #F4EEEA;                      /* warm off-white surface */
+    --line: #EADFD9;                         /* warm hairline borders */
+    --rgba-primary: rgba(176, 120, 95, 0.1); /* rose gold @ 10% — tints, hovers */
+    --gradient: linear-gradient(87deg, #FAF3EF 3.59%, #F4EFEC 95.02%);
+    --backdrop: rgba(42, 40, 43, 0.2);
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility corrections (WCAG AA). Same hues, minimally darkened — these
+   are the smallest shifts that clear the 4.5:1 threshold, so the design reads
+   unchanged while the audit passes.
+   --------------------------------------------------------------------------- */
+
+/* Struck-through compare-at price: #9C9391 on white measured 3.0:1. */
+.card-product .card-product-info .old-price,
+.card-product.style-list .card-product-info .old-price,
+.collection-position-2 .cls-content .price .old-price {
+    color: #7E7472;                      /* 4.54:1 */
+}
+
+/* "N% Off" badge: white on --critical #f03e3e measured 3.84:1. */
+.card-product .card-product-wrapper .on-sale-wrap .on-sale-item,
+.collection-position-2 .on-sale-wrap .on-sale-item {
+    background-color: #DC2626;           /* 4.83:1 with white */
+}
+
+/* Two headings jumped h3 -> h6, which fails sequential heading order. They are
+   now <h4>, the next level down, so the outline is valid. Neither had a
+   font-size of its own — they inherited the bare h6 rule — so pin the old h6
+   typography here to keep them pixel-identical. */
+.collection-circle .collection-content .cls-title .text,
+.tf-icon-box .content .icon-box-title {
+    font-size: 20px;
+    line-height: 28px;
+}
+
+/* Carousel dots fall just under the 24px minimum tap target. The <span> is
+   already a transparent 20px box — the visible dot is drawn by its ::after —
+   so widening the span alone enlarges the touch area and leaves the painted
+   dot untouched. (Do not restyle ::after here: that IS the dot.) */
+.sw-dots .swiper-pagination-bullet,
+.sw-dots.type-circle .swiper-pagination-bullet {
+    width: 24px;
+    height: 24px;
+}

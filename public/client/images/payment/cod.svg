@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 50" width="90" height="50" role="img" aria-label="Cash on Delivery">
+  <g stroke="#1F1811" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Truck box -->
+    <rect x="6" y="14" width="26" height="18" rx="1.5"/>
+    <!-- Truck cab -->
+    <path d="M32 20 L42 20 L46 26 L46 32 L32 32 Z"/>
+    <!-- Wheels -->
+    <circle cx="14" cy="36" r="3.5" fill="#ffffff"/>
+    <circle cx="38" cy="36" r="3.5" fill="#ffffff"/>
+  </g>
+  <!-- Rupee symbol inside the truck box -->
+  <text x="19" y="28" font-family="Arial Black, Helvetica, sans-serif" font-size="14" font-weight="900" fill="#1F1811" text-anchor="middle">₹</text>
+  <!-- COD label -->
+  <text x="54" y="32" font-family="Arial Black, Helvetica, sans-serif" font-size="18" font-weight="900" fill="#1F1811">COD</text>
+</svg>

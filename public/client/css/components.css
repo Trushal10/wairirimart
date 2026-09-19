@@ -1,0 +1,64 @@
+/* ============================================================
+   Shared storefront components.
+
+   Inlined by the layout alongside brand-theme.css and page-hero.css:
+   small enough that a cacheable request would cost more than the bytes,
+   and needed in the head so nothing flashes unstyled.
+   ============================================================ */
+
+/* ---------- home collection posters (client/index) ----------
+   Designed banners with their own lettering: show the whole image at its
+   natural shape. Beats mobile-fixes.css, which crops .collection-position
+   to 4:3 / 16:10 on phones and cut the text off these. */
+.collection-position.collection-position--poster,
+.collection-position.collection-position--poster.style-lg {
+    aspect-ratio: auto;
+    max-height: none;
+}
+.collection-position--poster .img-style { height: auto; }
+.collection-position--poster .img-style img { height: auto; object-fit: contain; display: block; }
+/* Fewer banners than fit in a row: centre them instead of leaving a gap. */
+.tf-sw-collection.is-few .swiper-wrapper { justify-content: center; }
+@media (min-width: 1200px) {
+    .tf-sw-collection.is-few .swiper-slide { max-width: calc((100% - 48px) / 3); }
+}
+
+/* ---------- empty state (client/partials/empty-state) ---------- */
+.es-block { text-align: center; padding: 56px 20px; }
+.es-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: #f4f4f5;
+    color: #8b9096;
+    margin-bottom: 16px;
+}
+.es-title { font-size: 18px; font-weight: 700; color: #14161a; margin: 0 0 6px; }
+.es-copy { font-size: 14px; color: #6b7076; margin: 0 auto 20px; max-width: 42ch; line-height: 1.6; }
+.es-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 22px;
+    border-radius: 10px;
+    background: #14161a;
+    color: #fff !important;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .15s ease;
+}
+.es-cta:hover { background: #2c3038; }
+
+/* ---------- product-grid pagination ----------
+   The shop and category grids are `display:grid` with 3 or 4 fixed columns,
+   and the pagination <ul> sits inside that grid as a direct child. It was
+   therefore laid out as a single grid cell — squeezed into one column's width,
+   with its 40px items spilling out of it. It has to span the whole row. */
+.tf-grid-layout > .wg-pagination {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+}

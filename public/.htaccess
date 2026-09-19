@@ -1,0 +1,109 @@
+# ---------------------------------------------------------------------------
+# Compression. Apache already gzips text assets here, but only for a default
+# type list — the fonts and JSON/SVG below were being served raw.
+# ---------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/x-javascript
+    AddOutputFilterByType DEFLATE application/json application/ld+json application/manifest+json
+    AddOutputFilterByType DEFLATE image/svg+xml application/xml application/rss+xml
+    AddOutputFilterByType DEFLATE font/ttf font/otf application/vnd.ms-fontobject
+    # Already-compressed containers gain nothing and cost CPU.
+    SetEnvIfNoCase Request_URI \.(?:woff2?|gif|jpe?g|png|webp|avif|zip|gz|pdf)$ no-gzip dont-vary
+</IfModule>
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css
+    AddOutputFilterByType BROTLI_COMPRESS text/javascript application/javascript
+    AddOutputFilterByType BROTLI_COMPRESS application/json application/ld+json image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Caching. Nothing under /client, /build or /storage was sending Cache-Control
+# at all, so the CDN reported MISS on every hit and browsers refetched the full
+# payload on repeat visits. Uploaded media is content-hashed by the upload
+# helper and CSS/JS carry ?v=<mtime>, so a long TTL is safe: a changed file
+# arrives under a new URL.
+# ---------------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault                          "access plus 1 hour"
+    ExpiresByType image/jpeg                "access plus 1 year"
+    ExpiresByType image/png                 "access plus 1 year"
+    ExpiresByType image/gif                 "access plus 1 year"
+    ExpiresByType image/webp                "access plus 1 year"
+    ExpiresByType image/avif                "access plus 1 year"
+    ExpiresByType image/svg+xml             "access plus 1 year"
+    ExpiresByType image/x-icon              "access plus 1 year"
+    ExpiresByType font/woff                 "access plus 1 year"
+    ExpiresByType font/woff2                "access plus 1 year"
+    ExpiresByType font/ttf                  "access plus 1 year"
+    ExpiresByType application/font-woff     "access plus 1 year"
+    ExpiresByType text/css                  "access plus 1 year"
+    ExpiresByType text/javascript           "access plus 1 year"
+    ExpiresByType application/javascript    "access plus 1 year"
+    # HTML must stay uncached — it carries the CSRF token and session state.
+    ExpiresByType text/html                 "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Static, versioned assets: immutable so browsers skip revalidation.
+    <FilesMatch "\.(css|js|jpe?g|png|gif|webp|avif|svg|ico|woff2?|ttf|otf|eot)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header unset Pragma
+    </FilesMatch>
+    # HTML responses stay private — Laravel sets its own no-cache headers.
+    <FilesMatch "\.(php|html)$">
+        Header set Cache-Control "no-cache, private"
+    </FilesMatch>
+    # Collapse the duplicate Vary that Apache + Laravel each append.
+    Header unset Vary
+    Header always set Vary "Accept-Encoding"
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # -----------------------------------------------------------------------
+    # Force HTTPS. The site already serves TLS and sends HSTS, but plain
+    # http:// answered 200 instead of redirecting — so anything that reached
+    # the http:// URL (an old link, a typed address, an audit run against it)
+    # stayed on an insecure connection and was scored as one.
+    #
+    # TLS is terminated at the CDN, which forwards the original scheme in
+    # X-Forwarded-Proto — the same header Laravel's TrustProxies reads to tell
+    # the two apart. Both are checked here so this cannot loop whether Apache
+    # terminates TLS itself or sits behind the proxy.
+    # -----------------------------------------------------------------------
+    # Local development is exempt: Laragon/valet serve these over plain HTTP,
+    # and redirecting there just breaks the dev site with no cert to land on.
+    RewriteCond %{HTTP_HOST} !=localhost
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
+    RewriteCond %{HTTP_HOST} !^192\.168\. [NC]
+    RewriteCond %{HTTP_HOST} !\.(test|local|localhost)$ [NC]
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle X-XSRF-Token Header
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>

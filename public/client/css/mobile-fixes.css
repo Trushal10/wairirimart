@@ -1,0 +1,523 @@
+/* ============================================================
+   Mobile-only responsive fixes.
+   NO design/palette/typography changes — only layout guards
+   that kick in on phones so the existing theme doesn't overflow
+   or hide content behind the fixed bottom toolbar.
+   ============================================================ */
+
+/* ============================================================
+   Wishlist heart — the theme's active state only tints the outline
+   red, which reads as a hover state, not a "saved" state. Make the
+   active button a solid red pill with a filled white heart so users
+   can tell at a glance that the product is in their wishlist.
+   Applies on all viewports.
+   ============================================================ */
+.card-product-wrapper .wishlist-toggle-btn.active,
+.card-product-wrapper .wishlist-toggle-btn[aria-pressed="true"] {
+    background: #e53935 !important;
+    color: #ffffff !important;
+    border-color: #e53935 !important;
+    box-shadow: 0 6px 16px rgba(229, 57, 53, 0.35) !important;
+}
+.card-product-wrapper .wishlist-toggle-btn.active .wishlist-icon,
+.card-product-wrapper .wishlist-toggle-btn[aria-pressed="true"] .wishlist-icon {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+    transform: scale(1.05);
+}
+/* Hover on an already-saved item should hint at "remove", not just look identical */
+.card-product-wrapper .wishlist-toggle-btn.active:hover,
+.card-product-wrapper .wishlist-toggle-btn[aria-pressed="true"]:hover {
+    background: #c62828 !important;
+    border-color: #c62828 !important;
+}
+/* Subtle pop when the state flips (JS toggles the .active class) */
+@keyframes wl-pop { 0% { transform: scale(0.85); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+.card-product-wrapper .wishlist-toggle-btn.active { animation: wl-pop 0.28s ease; }
+
+/* ============================================================
+   Payment badge row (footer + product page "Guaranteed checkout").
+   The theme's original CSS only sized images wrapped in <a>, so
+   after switching to a driven-by-gateway loop the theme card
+   images render at natural size (huge) while our SVGs render at
+   their intrinsic 60×38 (tiny). Force all badges to the same
+   28-px height with auto width, and give them a subtle chrome
+   so the row reads as one coherent set of card-shaped chips.
+   ============================================================ */
+.tf-payment { align-items: center; gap: 8px; flex-wrap: wrap; }
+.tf-payment ul { align-items: center; gap: 8px; flex-wrap: wrap; padding: 0; margin: 0; list-style: none; }
+.tf-payment ul li { list-style: none; }
+
+/* All img badges — both raster webp and our SVGs — normalize height */
+.tf-payment img,
+.tf-payment ul li img,
+.tf-product-info-guranteed .tf-payment img,
+footer .tf-payment ul img {
+    height: 28px !important;
+    width: auto !important;
+    max-width: 56px;
+    object-fit: contain;
+    background: #ffffff;
+    border: 1px solid #e2e5eb;
+    border-radius: 4px;
+    padding: 2px 4px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Text chip fallback (still used if a badge has no image) — same height + chrome */
+.pay-chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 28px; padding: 0 8px;
+    border-radius: 4px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: #ffffff; color: #2A282B;
+    border: 1px solid #e2e5eb;
+    line-height: 1;
+    vertical-align: middle;
+}
+.pay-chip--cod { background: #ffffff; color: #2A282B; }
+.tf-payment .pay-chip { margin: 0; }
+
+/* ============================================================
+   Footer logo — the theme has no size cap on the admin-uploaded
+   logo, so a high-res upload renders at natural (huge) size.
+   Cap the width so any logo lands at a reasonable footer scale.
+   Header logo has its own cap via .logo-header rules elsewhere.
+   ============================================================ */
+footer .footer-infor .footer-logo img,
+footer .footer-infor .footer-logo > a img {
+    max-width: 180px;
+    max-height: 80px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+@media (max-width: 991.98px) {
+    footer .footer-infor .footer-logo img { max-width: 150px; max-height: 70px; }
+}
+
+/* ---------- Global overflow guards (harmless on desktop) ---------- */
+html, body { overflow-x: hidden; }
+img, video { max-width: 100%; height: auto; }
+/* Do NOT include SVG in the height:auto rule — icons in the header/footer
+   set width/height="24" as HTML attributes; forcing height:auto collapses
+   them into dots (which is what happened before this fix). */
+
+/* ============================================================
+   Header logo sizing.
+   The theme sizes the logo by WIDTH (.logo-header img{width:144px}),
+   which only holds for a wide wordmark. The logo is admin-uploadable
+   and the brand mark is stacked (icon over two lines of text, ~4:3),
+   so 144px wide came out ~109px tall and inflated the 64px header by
+   two thirds, leaving the wordmark small and adrift in whitespace.
+
+   Size by HEIGHT instead, so header height stays predictable whatever
+   ratio gets uploaded, and cap the width so a wide wordmark can't
+   overrun its column. The <a> carries the height — it reserves the
+   space before the image loads, which is what keeps the header from
+   shifting (headerSticky() in main.js measures header height on ready,
+   so the box must be correct before the logo arrives). The image then
+   scales inside that box with width AND height auto, which is what
+   preserves its aspect ratio; object-fit is the backstop.
+   ============================================================ */
+#header .logo-header {
+    display: inline-flex;
+    align-items: center;
+    height: 72px;
+    max-width: 190px;
+}
+#header .logo-header img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+/* Below 1200px the theme centres the logo with its own block-level
+   `.logo-header{display:flex;justify-content:center}` (styles.css:15261).
+   Our #header rule outranks it, so restate the centring here rather than
+   silently left-aligning the logo across the whole tablet band — with the
+   desktop nav hidden the row is three equal thirds, so the middle column's
+   centre IS the page centre. Block-level is also what makes `margin:auto`
+   work; auto margins are ignored on an inline-flex box. */
+@media (max-width: 1199.98px) {
+    #header .logo-header {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        height: 60px;
+        max-width: 165px;
+        margin: 0 auto;
+    }
+}
+
+/* ---------- Header on mobile ----------
+   Hide the top-right icon strip (search + account + wishlist + cart) on
+   phones so the header only shows the hamburger + logo. All those actions
+   are available in the bottom toolbar instead, which is easier to reach. */
+@media (max-width: 991.98px) {
+    #header .nav-icon { display: none !important; }
+    /* Give the logo the space the icon column no longer needs */
+    #header .col-md-4.col-6,
+    #header .col-xl-3.col-md-4.col-6 { flex: 1 1 auto; max-width: none; text-align: center; }
+    /* Hiding .nav-icon empties that column but leaves it holding a
+       col-3/col-md-4 share of the row, so the "centered" logo was really
+       centered in what was left over — visibly off to one side. Pin both
+       outer columns to the same 60px so the middle one is symmetric and
+       the logo lands on the true page centre. */
+    #header .col-md-4.col-3.d-xl-none,
+    #header .wrapper-header > .col-xl-3.col-md-4.col-3 { flex: 0 0 60px; max-width: 60px; }
+    /* display/centring come from the <=1199.98px block above */
+    #header .logo-header { height: 52px; max-width: 150px; }
+}
+@media (max-width: 575.98px) {
+    #header .logo-header { height: 46px; max-width: 132px; }
+}
+
+/* ---------- Fixed bottom nav clearance ----------
+   The bar is 70px tall (15px padding x2 + a 40px row) but the theme only
+   clears 67px, so the last line of the footer sits under it. Nudge the
+   clearance past the bar's real height.
+
+   Deliberately NOT touching the bar's own height: .tf-sticky-btn-atc
+   (bottom:67px), the WhatsApp button (bottom:84px) and #scroll-top are
+   all positioned against it, so growing it would push the bar into them.
+   .has-pb pages keep their own larger clearance.
+
+   Scoped to #footer, not the bare element: the My Orders page renders a
+   <footer class="order-card__foot"> per order card, and an element-wide
+   rule outranks .order-card__foot and pads every card. */
+@media (max-width: 991.98px) {
+    #footer:not(.has-pb) { padding-bottom: 78px; }
+}
+
+/* ============================================================
+   Hero + Featured-Collection sliders — centered overlay.
+   Big legible caption + refined button, both centered on the
+   banner. A soft dark radial vignette behind the text (not a
+   flat scrim across the whole image) keeps the artwork visible
+   while making the copy legible on any background.
+   ============================================================ */
+.wrap-slider,
+.collection-position { position: relative; }
+
+.hero-overlay.hero-overlay--center {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    /* Radial vignette — dark at center where the text sits, fading to
+       transparent at the edges so the banner artwork breathes. */
+    background: radial-gradient(ellipse at center,
+        rgba(0, 0, 0, 0.42) 0%,
+        rgba(0, 0, 0, 0.22) 40%,
+        rgba(0, 0, 0, 0) 75%);
+    pointer-events: none;
+}
+.hero-overlay.hero-overlay--center .hero-overlay__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 720px;
+    text-align: center;
+    pointer-events: auto;
+}
+
+/* Caption — big, refined, centered */
+.hero-overlay .hero-caption {
+    margin: 0;
+    color: #ffffff;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+    /* Clamp to 3 lines with graceful ellipsis on very long captions */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-wrap: balance;
+}
+
+/* Refined charcoal pill button, centered, with animated arrow on hover */
+.hero-overlay .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 30px;
+    background: #ffffff;
+    color: #14110F !important;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+.hero-overlay .hero-cta svg {
+    flex: 0 0 auto;
+    transition: transform 0.2s ease;
+}
+.hero-overlay .hero-cta:hover {
+    color: #ffffff !important;
+    background: #14110F;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.55);
+}
+.hero-overlay .hero-cta:hover svg { transform: translateX(3px); }
+
+/* Responsive caption scaling */
+@media (max-width: 991.98px) {
+    .hero-overlay .hero-caption { font-size: 32px; }
+    .hero-overlay.hero-overlay--center .hero-overlay__inner { gap: 16px; max-width: 560px; }
+}
+@media (max-width: 767.98px) {
+    .hero-overlay .hero-caption { font-size: 26px; }
+    .hero-overlay .hero-cta { padding: 12px 24px; font-size: 13px; }
+}
+@media (max-width: 575.98px) {
+    .hero-overlay.hero-overlay--center { padding: 16px; }
+    .hero-overlay.hero-overlay--center .hero-overlay__inner { gap: 12px; }
+    .hero-overlay .hero-caption { font-size: 20px; line-height: 1.15; }
+    .hero-overlay .hero-cta { padding: 10px 20px; font-size: 12px; }
+}
+
+/* Featured collection cards — smaller caption in the 2-up layout */
+.hero-overlay.hero-overlay--sm .hero-caption { font-size: 24px; }
+.hero-overlay.hero-overlay--sm .hero-cta { padding: 11px 22px; font-size: 12px; }
+@media (max-width: 575.98px) {
+    .hero-overlay.hero-overlay--sm .hero-caption { font-size: 18px; }
+    .hero-overlay.hero-overlay--sm .hero-cta { padding: 9px 18px; font-size: 11px; }
+}
+
+/* ============================================================
+   Hero slider — the theme forces a fixed 400–500px height with
+   object-fit:cover, which crops admin-uploaded banner artwork on
+   phones. On mobile, let the wrap-slider hug the image's natural
+   aspect so nothing is cropped and there is no empty cream gap
+   above/below. Do NOT set aspect-ratio here — the container
+   should follow the image, not the other way around.
+   ============================================================ */
+@media (max-width: 991.98px) {
+    .tf-slideshow .wrap-slider,
+    .slider-default .wrap-slider {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    .tf-slideshow .swiper-slide { height: auto !important; }
+    .slider-default .wrap-slider img {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 80vh;
+        object-fit: contain !important;
+        display: block;
+    }
+    /* Pin the theme's caption overlay to the bottom of the image, not the
+       bottom of a taller container. */
+    .slider-default .box-content {
+        left: 12px !important;
+        right: 12px !important;
+        bottom: 12px !important;
+        padding: 0 !important;
+    }
+    /* Keep pagination dots from covering the CTA */
+    .tf-slideshow .wrap-pagination { bottom: 6px !important; }
+    .tf-slideshow .sw-dots.type-circle .swiper-pagination-bullet {
+        width: 10px !important; height: 10px !important;
+    }
+}
+
+/* ============================================================
+   Featured / collection slider (2-up cards under the hero).
+   ============================================================ */
+@media (max-width: 767.98px) {
+    .collection-position,
+    .collection-position.style-lg {
+        aspect-ratio: 4 / 3;
+        max-height: 340px;
+    }
+    .collection-position .img-style img { object-position: center; }
+}
+@media (max-width: 575.98px) {
+    .collection-position,
+    .collection-position.style-lg {
+        aspect-ratio: 16 / 10;
+        max-height: 260px;
+    }
+}
+
+/* ============================================================
+   Fixed bottom mobile toolbar clearance.
+   The theme shows .tf-toolbar-bottom (position:fixed; bottom:0)
+   below 992px — add space so page CTAs and floating buttons are
+   not covered by it. Only takes effect where the toolbar shows.
+   ============================================================ */
+@media (max-width: 991.98px) {
+    body { padding-bottom: 72px; }
+    #scroll-top { bottom: 84px; }
+    /* If the WhatsApp button component is present, its own inline
+       styles already lift it to bottom:84px on <=767, and its
+       inline CSS lifts #scroll-top to 148px — those still win. */
+
+    /* Theme sets `.tf-toolbar-bottom .toolbar-item { flex: 1 0 20% }`
+       which only fits 5 items. We now render 6 (Shop, Categories,
+       Search, Wishlist, Cart, Profile) — let them share the row. */
+    .tf-toolbar-bottom { padding: 12px 4px !important; gap: 2px; }
+    .tf-toolbar-bottom .toolbar-item { flex: 1 1 0 !important; min-width: 0; }
+    .tf-toolbar-bottom .toolbar-item a { padding-left: 4px !important; padding-right: 4px !important; }
+    .tf-toolbar-bottom .toolbar-label { font-size: 10.5px !important; white-space: nowrap; }
+}
+@media (max-width: 359.98px) {
+    /* Very narrow phones — trim the label size a bit more */
+    .tf-toolbar-bottom .toolbar-label { font-size: 9.5px !important; }
+}
+
+/* ============================================================
+   Checkout page — the .co-nav row (Back + primary CTA) uses
+   theme .tf-btn with white-space:nowrap. On tiny phones the
+   primary button ("Place order · ₹1,234.00") can be clipped or
+   hidden. Stack vertically with the primary on top and allow
+   the label to wrap.
+
+   Also: the theme applies `.form-payment .tf-btn { margin-top: 30px|40px }`
+   which stacks on top of the flex gap and leaves a huge white void
+   between the two buttons. Neutralise that margin for our nav row.
+   ============================================================ */
+@media (max-width: 575.98px) {
+    .co-nav {
+        display: flex !important;
+        flex-direction: column-reverse !important;
+        gap: 10px !important;
+    }
+    .co-nav .tf-btn,
+    .co-nav .co-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        white-space: normal !important;
+        text-align: center !important;
+        margin: 0 !important;
+    }
+    .co-nav .tf-btn .text {
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+    }
+}
+/* All viewports: cancel the theme's forced 30/40px top-margin on payment
+   form buttons — we handle spacing with our own .co-nav / gap tokens. */
+.form-payment .co-nav .tf-btn { margin-top: 0 !important; }
+
+/* ============================================================
+   Kill the theme's decorative skew-in overlay on the checkout
+   Back + Place-order buttons. The theme's `.tf-btn::after` scales
+   a skewed rectangle from below the button on hover — meant as a
+   "swipe-fill" animation, but on mobile the :hover state sticks
+   after tap and renders a jagged red diagonal shape covering the
+   button. Use a plain background swap for hover instead so the
+   button stays a clean rounded rectangle.
+   ============================================================ */
+.co-nav .tf-btn::after { display: none !important; }
+.co-nav .tf-btn.btn-white:hover {
+    background: #f5f5f5 !important;
+    color: #111 !important;
+    border-color: #111 !important;
+}
+.co-nav .tf-btn.btn-fill:hover {
+    filter: brightness(0.92);
+}
+
+/* Same overlay, different victim: `.tf-btn::after` sits at z-index 1 and the
+   theme only lifts `.tf-btn .text` / `.tf-btn .icon` above it. A button whose
+   content is a bare <svg> (a brand mark, say) has neither class, so the sweep
+   paints straight over the icon. Lift direct svg children too — they should be
+   above the decoration in every case, hovered or not. */
+.tf-btn > svg {
+    position: relative;
+    z-index: 2;
+}
+
+/* ============================================================
+   Forms with paired inputs (contact form, address form).
+   Theme uses `.cols { display:flex; gap:20px 16px }` — on very
+   narrow phones two full-width children get squeezed into ~150px
+   each. Wrap them.
+   ============================================================ */
+@media (max-width: 479.98px) {
+    form .cols { flex-wrap: wrap; }
+    form .cols > * { min-width: 100%; }
+}
+
+/* ============================================================
+   Auth cards (login / register / forgot / reset) need side
+   padding so they don't kiss the viewport edges on tiny phones.
+   ============================================================ */
+@media (max-width: 479.98px) {
+    .auth-card {
+        margin-left: 8px;
+        margin-right: 8px;
+    }
+}
+
+/* ============================================================
+   Product detail — mobile gallery.
+   `.tf-product-media-wrap.sticky-top` pins the gallery on phones
+   so a swipe over it never advances the page. Unpin it under
+   992px — the gallery stacks above the info panel there, so
+   sticky buys nothing.
+
+   Do NOT set `touch-action` on the main gallery swiper. Swiper 8
+   only applies `touch-action: pan-y` (via .swiper-pointer-events)
+   on non-touch devices; on real phones it deliberately leaves
+   touch-action alone so it can arbitrate the gesture in JS —
+   horizontal drag = slide, vertical drag = release to the page.
+   Forcing `pan-y` hands that decision to the browser, which then
+   claims every slightly-diagonal swipe as a page scroll and the
+   gallery never moves.
+
+   Below 1200px the theme already drops the thumbs to a horizontal
+   strip under the main image (.thumbs-slider goes column,
+   thumbs get order:1) and zoom.js switches that swiper to
+   direction:horizontal, so it can't trap vertical scroll either.
+   Keep it visible — it's the only cue on a phone that the product
+   has more than one photo.
+   ============================================================ */
+@media (max-width: 991.98px) {
+    .tf-product-media-wrap.sticky-top,
+    .tf-product-media-wrap {
+        position: static !important;
+        top: auto !important;
+    }
+    .thumbs-slider {
+        gap: 12px;
+    }
+    .thumbs-slider .tf-product-media-main {
+        width: 100% !important;
+    }
+    /* Horizontal thumb strip: cap the height the vertical layout
+       reserved (687px) and keep each thumb finger-sized. */
+    .thumbs-slider .tf-product-media-thumbs {
+        width: 100% !important;
+        max-height: none;
+    }
+    .tf-product-media-thumbs .swiper-slide {
+        width: 64px;
+    }
+    .tf-product-media-thumbs .swiper-slide .item {
+        max-width: 64px;
+        max-height: 64px;
+        height: 64px;
+    }
+    .tf-product-media-thumbs .swiper-slide .item::after {
+        border-width: 2px;
+    }
+}

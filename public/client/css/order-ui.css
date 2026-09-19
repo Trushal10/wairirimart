@@ -1,0 +1,329 @@
+/* ============================================================
+   Order UI — shared by the confirmation page, the tracking page
+   and the profile's order list.
+
+   Not loaded globally: these three pages inline it themselves via
+   CommonHelper::inlineCss(), the same trick the layout uses for
+   brand-theme.css. That keeps it out of the other ~20 storefront
+   pages that never render an order, while still leaving one file
+   to edit when the palette moves.
+
+   Every colour here is a token so the four order states read the
+   same wherever they appear. They used to be inline hex literals
+   duplicated across three Blade files, which is how 'canceled'
+   ended up styled on one page and invisible on another.
+   ============================================================ */
+
+:root {
+    --ou-ok-bg: #e2f7e9;
+    --ou-ok-fg: #177a3b;
+    --ou-info-bg: #e5f0ff;
+    --ou-info-fg: #1758c6;
+    --ou-warn-bg: #fff8e6;
+    --ou-warn-fg: #a06600;
+    --ou-bad-bg: #fde3e3;
+    --ou-bad-fg: #a83b32;
+    --ou-muted-bg: #f1f1f1;
+    --ou-muted-fg: #5a5a5a;
+
+    --ou-ink: #14161a;
+    --ou-body: #55595f;
+    --ou-soft: #878c93;
+    --ou-line: #e8e8e8;
+    --ou-line-soft: #f2f2f2;
+    --ou-surface: #fff;
+    --ou-ground: #f7f7f8;
+    --ou-radius: 14px;
+}
+
+/* ---------- status chip ---------- */
+.ou-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+.ou-chip::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 6px;
+}
+.ou-chip-ok    { background: var(--ou-ok-bg);    color: var(--ou-ok-fg); }
+.ou-chip-info  { background: var(--ou-info-bg);  color: var(--ou-info-fg); }
+.ou-chip-warn  { background: var(--ou-warn-bg);  color: var(--ou-warn-fg); }
+.ou-chip-bad   { background: var(--ou-bad-bg);   color: var(--ou-bad-fg); }
+.ou-chip-muted { background: var(--ou-muted-bg); color: var(--ou-muted-fg); }
+/* Inside a dense table row the dot is noise. */
+.ou-chip-plain::before { display: none; }
+
+/* ---------- milestone rail ----------
+   Placed → Confirmed → Shipped → Delivered, horizontal on desktop and
+   vertical on phones. The connector is drawn per-step rather than as one
+   absolutely-positioned bar so it survives labels wrapping to two lines. */
+.ou-rail {
+    display: flex;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.ou-rail-step {
+    flex: 1 1 0;
+    min-width: 0;
+    position: relative;
+    text-align: center;
+    padding-top: 30px;
+}
+.ou-rail-step::before {
+    /* the marker */
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--ou-line);
+    z-index: 1;
+}
+.ou-rail-step::after {
+    /* the connector to the NEXT step */
+    content: '';
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--ou-line);
+}
+.ou-rail-step:last-child::after { display: none; }
+
+.ou-rail-step.is-done::before {
+    background: var(--ou-ok-fg);
+    border-color: var(--ou-ok-fg);
+    /* tick */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.ou-rail-step.is-done::after { background: var(--ou-ok-fg); }
+.ou-rail-step.is-current::before {
+    background: #fff;
+    border-color: var(--ou-ok-fg);
+    box-shadow: 0 0 0 4px rgba(23, 122, 59, .14);
+}
+
+.ou-rail-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ou-soft);
+    line-height: 1.35;
+}
+.ou-rail-step.is-done .ou-rail-label,
+.ou-rail-step.is-current .ou-rail-label { color: var(--ou-ink); }
+.ou-rail-at {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ou-soft);
+    margin-top: 3px;
+}
+
+/* A cancelled order has no forward progress to show. */
+.ou-rail.is-cancelled .ou-rail-step.is-done::before {
+    background: var(--ou-bad-fg);
+    border-color: var(--ou-bad-fg);
+}
+.ou-rail.is-cancelled .ou-rail-step.is-done::after { background: var(--ou-bad-fg); }
+
+@media (max-width: 575.98px) {
+    /* Four labels across a 320px screen truncate to nonsense. Stack them. */
+    .ou-rail { display: block; }
+    .ou-rail-step {
+        text-align: left;
+        padding: 0 0 18px 30px;
+        min-height: 34px;
+    }
+    .ou-rail-step:last-child { padding-bottom: 0; }
+    .ou-rail-step::before { top: 2px; left: 0; transform: none; }
+    .ou-rail-step::after {
+        top: 18px;
+        left: 7px;
+        width: 2px;
+        height: calc(100% - 18px);
+    }
+    .ou-rail-at { display: inline; margin-left: 8px; }
+}
+
+/* ---------- cards ---------- */
+.ou-card {
+    background: var(--ou-surface);
+    border: 1px solid var(--ou-line);
+    border-radius: var(--ou-radius);
+    padding: 22px;
+    margin-bottom: 16px;
+}
+.ou-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ou-ink);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 0 0 16px;
+}
+
+/* key/value rows */
+.ou-kv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    font-size: 13.5px;
+    color: var(--ou-body);
+    border-bottom: 1px solid var(--ou-line-soft);
+}
+.ou-kv:last-child { border-bottom: 0; padding-bottom: 0; }
+.ou-kv:first-child { padding-top: 0; }
+.ou-kv dt { font-weight: 500; margin: 0; }
+.ou-kv dd { margin: 0; color: var(--ou-ink); font-weight: 600; text-align: right; }
+
+/* line items */
+.ou-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--ou-line-soft);
+}
+.ou-item:last-child { border-bottom: 0; }
+.ou-item-img {
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: var(--ou-ground);
+    border: 1px solid var(--ou-line-soft);
+}
+.ou-item-body { flex: 1 1 auto; min-width: 0; }
+.ou-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ou-ink);
+    margin: 0 0 3px;
+    line-height: 1.4;
+}
+.ou-item-name a { color: inherit; text-decoration: none; }
+.ou-item-name a:hover { text-decoration: underline; }
+.ou-item-meta { font-size: 12.5px; color: var(--ou-soft); }
+.ou-item-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ou-ink);
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* totals */
+.ou-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 13.5px;
+    color: var(--ou-body);
+    padding: 6px 0;
+}
+.ou-total-grand {
+    margin-top: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--ou-line);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ou-ink);
+}
+.ou-total-save { color: var(--ou-ok-fg); }
+
+/* ---------- buttons ---------- */
+.ou-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.ou-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.ou-btn svg { flex: 0 0 auto; }
+.ou-btn-primary { background: var(--ou-ink); color: #fff; border-color: var(--ou-ink); }
+.ou-btn-primary:hover { background: #2c3038; color: #fff; }
+.ou-btn-ghost { background: #fff; color: var(--ou-ink); border-color: #dcdcdc; }
+.ou-btn-ghost:hover { border-color: var(--ou-ink); color: var(--ou-ink); }
+.ou-btn-danger { background: #fff; color: var(--ou-bad-fg); border-color: #eec4c1; }
+.ou-btn-danger:hover { background: var(--ou-bad-bg); color: var(--ou-bad-fg); border-color: var(--ou-bad-fg); }
+.ou-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20, 22, 26, .18); }
+
+/* ---------- notice strip ---------- */
+.ou-note {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    border: 1px solid;
+}
+.ou-note-info { background: #f2f7ff; border-color: #d5e4fb; color: #1b3f74; }
+.ou-note-warn { background: #fff8e6; border-color: #f6e2b0; color: #7a5300; }
+.ou-note-bad  { background: var(--ou-bad-bg); border-color: #f4c5c1; color: var(--ou-bad-fg); }
+.ou-note-icon { flex: 0 0 18px; margin-top: 1px; }
+
+/* ---------- empty state ---------- */
+.ou-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ou-soft);
+}
+.ou-empty-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ou-ink);
+    margin: 12px 0 6px;
+}
+.ou-empty p { font-size: 13.5px; margin: 0 0 18px; }
+
+@media (max-width: 575.98px) {
+    .ou-card { padding: 16px; border-radius: 12px; }
+    .ou-actions .ou-btn { flex: 1 1 auto; }
+    .ou-item-img { flex-basis: 46px; width: 46px; height: 46px; }
+}

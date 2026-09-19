@@ -1,0 +1,77 @@
+/* ============================================================
+   Static page hero (client/partials/page-hero.blade.php).
+
+   The Earthma banner artwork already carries its own headline and
+   tagline, so it runs full-bleed with nothing painted over it and
+   the breadcrumb trail sits in a thin strip underneath. The page
+   title stays in the DOM but is hidden from sight so every page
+   still has exactly one heading for screen readers and crawlers.
+
+   Loaded after styles.css so these win over the theme.
+   ============================================================ */
+
+.page-hero {
+    background: #FAF7F5;
+    border-bottom: 1px solid var(--line, #EADFD9);
+}
+
+/* Visually hidden, still read aloud and still indexed. */
+.page-hero__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Capped at a fixed band height so the banner does not dominate the
+   fold on wide screens; the artwork is cropped from the centre rather
+   than squashed. Phones fall back to the natural 2.55:1 ratio, where
+   a 261px crop would cut away the left-hand copy. */
+.page-hero__img {
+    display: block;
+    width: 100%;
+    height: 261px;
+    object-fit: cover;
+    object-position: center;
+}
+
+.page-hero__crumbs {
+    padding: 14px 0 13px;
+}
+.page-hero__crumbs .breadcrumbs {
+    gap: 8px;
+    margin: 0;
+    flex-wrap: wrap;
+}
+.page-hero__crumbs .breadcrumbs a,
+.page-hero__crumbs .breadcrumbs li {
+    color: var(--secondary, #6E6663);
+    font-size: 13px;
+}
+.page-hero__crumbs .breadcrumbs a:hover {
+    color: var(--primary, #B0785F);
+}
+.page-hero__crumbs .breadcrumbs .icon-arrRight {
+    font-size: 10px;
+    opacity: .5;
+}
+
+@media (max-width: 767.98px) {
+    .page-hero__img {
+        height: auto;
+        object-fit: fill;
+    }
+    .page-hero__crumbs {
+        padding: 11px 0 10px;
+    }
+    .page-hero__crumbs .breadcrumbs a,
+    .page-hero__crumbs .breadcrumbs li {
+        font-size: 12px;
+    }
+}
